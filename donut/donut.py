@@ -1,5 +1,4 @@
 import math as m
-import numpy as np
 from asciimatics.screen import Screen
 
 
@@ -9,18 +8,19 @@ class donut:
         
         # torus settings
         self.torusCircleResolution = 30
-        self.torusResolution = 30
+        self.torusResolution = 60
         self.torusCircleRadius = 0.3
-        self.torusRadius = .6
-        self.rotationSpeed = [0.1, 0.1, 0.1] # x, y, z
+        self.torusRadius = .8
+        self.rotationSpeed = [0.01, 0.01, 0.01] # x, y, z
 
         # light settings
-        self.lightPos = [1, 2 , -2] # relative to donut
+        self.lightPos = [0, 0 , -2] # relative to donut
 
         # ascii settings
         self.zoom = 0.5
         self.screenSize = self.screen.height
         self.characters = '.,-~:;=!*#$@'
+        self.characterDestortion = 2 # distortion of ascii character dimensions
 
         # camera settings
         self.fov = 10 # in degrees
@@ -78,7 +78,6 @@ class donut:
         for i in range(self.torusResolution):
             newCircle = [self.rotate(circle[ii], 'y', torusStepSize*i) for ii in range(self.torusCircleResolution)]
             torus += newCircle
-        print('donut generated')
         return torus
     
     def rotateTorus(self):
@@ -108,6 +107,7 @@ class donut:
             if distance < min: min = distance
             if distance > max: max = distance
             brightness.append(distance)
+        print(brightness, min, max)
         for i in range(len(brightness)):
             brightness[i] = (brightness[i] - min) / (max - min)
         return brightness            
@@ -117,12 +117,10 @@ class donut:
         self.screen.clear()
         for i in range(len(projection)):
             vertex = projection[i]
-            pixel = [int(round(vertex[ii]* self.screenSize * self.zoom + self.screenSize / 2)) for ii in range(2)]
+            pixel = [int(round(vertex[0]* self.screenSize * self.zoom + self.screen.width / 2)), int(round(vertex[1]* self.screenSize * self.zoom / self.characterDestortion + self.screen.height / 2))]
             character = self.characters[round(brightness[i] / stepSize)-1]
             self.screen.print_at(character, pixel[0], pixel[1])
         self.screen.refresh()
-
-        
 
     def loop(self):
         while True:
