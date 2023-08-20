@@ -132,4 +132,3 @@ class donut:
             self.rotateTorus()
 
 Screen.wrapper(donut)
-# test sync
