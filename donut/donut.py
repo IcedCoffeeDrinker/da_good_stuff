@@ -14,7 +14,7 @@ class donut:
         self.rotationSpeed = [0.01, 0.01, 0.01] # x, y, z
 
         # light settings
-        self.lightPos = [0, 0 , -2] # relative to donut
+        self.lightPos = [1, 1 , -1] # relative to donut
 
         # ascii settings
         self.zoom = 0.5
@@ -66,13 +66,15 @@ class donut:
         return self.matrixMultiplier(matrix, vertex)
             
     def generateDonut(self):
-        circleStepSize = 2 * m.pi / self.torusCircleResolution
         circle = []
+        circleStepSize = 2 * m.pi / self.torusCircleResolution
+
         for i in range(self.torusCircleResolution):
             vertex = [self.torusRadius+self.torusCircleRadius*m.cos(circleStepSize*i),
                       self.torusCircleRadius*m.sin(circleStepSize*i),
                       0]
             circle.append(vertex)
+
         torusStepSize = 2 * m.pi / self.torusResolution
         torus = []
         for i in range(self.torusResolution):
@@ -86,14 +88,16 @@ class donut:
             self.torus[i] = self.rotate(self.torus[i], 'y', self.rotationSpeed[1])
             self.torus[i] = self.rotate(self.torus[i], 'z', self.rotationSpeed[2])
 
-    def project(self):
+    def project(self, brightness):
         projection = []
-        for vertex in self.torus:
+        for i in range(len(self.torus)):
+            vertex = self.torus[i]
+            light = brightness[i]
             copyVertex = vertex.copy()
             copyVertex.append(1)
             copyVertex[2] += self.zOffset
             copyVertex = self.matrixMultiplier(self.perspectiveMatrix, copyVertex)
-            copyVertex = [copyVertex[0] / copyVertex[3], copyVertex[1] / copyVertex[3], copyVertex[2] / copyVertex[3]]
+            copyVertex = [copyVertex[0] / copyVertex[3], copyVertex[1] / copyVertex[3], copyVertex[2] / copyVertex[3], light]
             projection.append(copyVertex)
         projection.sort(key=lambda x: x[2], reverse=True)
         return projection
@@ -107,26 +111,25 @@ class donut:
             if distance < min: min = distance
             if distance > max: max = distance
             brightness.append(distance)
-        print(brightness, min, max)
         for i in range(len(brightness)):
             brightness[i] = (brightness[i] - min) / (max - min)
         return brightness            
 
-    def ascii(self, projection, brightness):
+    def ascii(self, projection):
         stepSize = 1 / len(self.characters)
         self.screen.clear()
         for i in range(len(projection)):
             vertex = projection[i]
             pixel = [int(round(vertex[0]* self.screenSize * self.zoom + self.screen.width / 2)), int(round(vertex[1]* self.screenSize * self.zoom / self.characterDestortion + self.screen.height / 2))]
-            character = self.characters[round(brightness[i] / stepSize)-1]
+            character = self.characters[round(projection[i][3] / stepSize)-1]
             self.screen.print_at(character, pixel[0], pixel[1])
         self.screen.refresh()
 
     def loop(self):
         while True:
             brightness = self.light()
-            projection = self.project()
-            self.ascii(projection, brightness)
+            projection = self.project(brightness)
+            self.ascii(projection)
             self.rotateTorus()
 
 Screen.wrapper(donut)
