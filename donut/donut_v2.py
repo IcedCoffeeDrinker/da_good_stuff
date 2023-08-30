@@ -11,7 +11,7 @@ class donut:
         self.torusResolution = 60
         self.torusCircleRadius = 0.3
         self.torusRadius = .8
-        self.rotationSpeed = [0.0, 0.01, 0.0] # x, y, z
+        self.rotationSpeed = [0.01, 0.01, 0.01] # x, y, z
 
         # light settings
         lightPos = [1, -1 , -5] # relative to donut
