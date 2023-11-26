@@ -123,6 +123,7 @@ class donut:
                 if difference > m.pi: difference = 2*m.pi - difference
                 totalDifference += difference
             totalDifference = totalDifference / m.pi / 3
+            if totalDifference > 1: print(totalDifference)
             brightness.append(totalDifference)
         return brightness            
 
